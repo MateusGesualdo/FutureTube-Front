@@ -24,12 +24,22 @@ export const updatePageNumber = newPageNumber => ({
     payload: { newPageNumber }
 })
 
+export const setLastPage = pageNumber => ({
+    type: 'SET_LAST_PAGE',
+    payload: { pageNumber }
+})
+
 export const getAllVideos = (page) => dispatch => {
 
     axios
         .get(`${baseUrl}/videos/all?page=${page}`)
         .then(res => {
-            dispatch(storeVideos(res.data.videos))
+            if (res.data.videos.length) {
+                dispatch(storeVideos(res.data.videos))
+                dispatch(updatePageNumber(page))
+            } else {
+                dispatch(setLastPage(page - 1))
+            }
         })
         .catch(err => {
             console.log(err.message)
@@ -56,9 +66,14 @@ export const highlightVideo = (id) => dispatch => {
 }
 
 export const getUserUploads = (id) => dispatch => {
+    const token = window.localStorage.getItem("token")
+    const headers = { Authorization: token }
+    const path = id ? `/videos?user=${id}` : '/videos?user'
+
     axios
-        .get(`${baseUrl}/videos?user=${id}`)
+        .get(`${baseUrl}${path}`, { headers })
         .then(res => {
+
             dispatch(storeVideos(res.data.videos))
             dispatch(push(routes.root))
         })
@@ -67,13 +82,13 @@ export const getUserUploads = (id) => dispatch => {
         })
 }
 
-export const deleteVideo = id => dispatch => {
+export const deleteVideo = (userId, videoId) => dispatch => {
     const token = window.localStorage.getItem("token")
     const headers = { Authorization: token }
 
     axios
-        .delete(`${baseUrl}/videos/${id}`, { headers })
-        .then(() => dispatch(getUserUploads(id)))
+        .delete(`${baseUrl}/videos/${videoId}`, { headers })
+        .then(() => { dispatch(getUserUploads(userId)) })
         .catch(err => alert(err.message))
 
 }
@@ -90,16 +105,9 @@ export const uploadVideo = video => dispatch => {
             { headers }
         )
         .then(res => {
-            dispatch(push(routes.root))
-            alert(res.message)
+            dispatch(getUserUploads())
         })
         .catch(err => {
             alert(err.message)
         })
-}
-
-export const changePage = newPageNumber => dispatch => {
-    dispatch(getAllVideos(newPageNumber))
-    dispatch(updatePageNumber(newPageNumber))
-
 }

@@ -7,7 +7,8 @@ const initialState = {
         description: '',
         userId: ''
     },
-    currentPage: 1
+    currentPage: 1,
+    lastPage: 0
 }
 
 export default function videos(state = initialState, action) {
@@ -16,8 +17,10 @@ export default function videos(state = initialState, action) {
             return { ...state, list: action.payload.videos }
         case 'STORE_HIGHLIGHTED_VIDEO':
             return { ...state, highlighted: action.payload.video }
-            case 'UPDATE_PAGE_NUMBER':
-                return { ...state, currentPage: action.payload.newPageNumber }
+        case 'UPDATE_PAGE_NUMBER':
+            return { ...state, currentPage: action.payload.newPageNumber }
+        case 'SET_LAST_PAGE':
+            return { ...state, lastPage: action.payload.pageNumber }
         default: return state
 
     }

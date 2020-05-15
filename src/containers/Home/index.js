@@ -7,7 +7,7 @@ import PageHeader from '../../components/PageHeader'
 import AvatarWithMenu from '../../components/AvatarWithMenu'
 import VideoCard from '../../components/VideoCard'
 import { Button } from '@material-ui/core'
-import { getAllVideos, highlightVideo, deleteVideo, changePage } from '../../actions/videos.js'
+import { getAllVideos, highlightVideo, deleteVideo } from '../../actions/videos.js'
 import styled from 'styled-components'
 import { login } from '../../actions/users'
 
@@ -55,18 +55,19 @@ const Home = props => {
             {
                 !props.highlightedUser.id &&
                 <PageButtonsContainer>
-                    <Button
+                    {props.currentPage > 1 ? <Button
                         color='primary'
-                        onClick={() => props.changePage(props.currentPage - 1)}
+                        onClick={() => props.getAllVideos(props.currentPage - 1)}
                     >
                         Anterior
-                </Button>
-                    <Button
+                    </Button> : <span></span>}
+                    {props.currentPage !== props.lastPage && <Button
                         color='primary'
-                        onClick={() => props.changePage(props.currentPage + 1)}
+                        onClick={() => props.getAllVideos(props.currentPage + 1)}
+                        variant={props.currentPage === props.lastPage ? "disabled" : "text"}
                     >
-                        Próxima
-                </Button>
+                            Próxima
+                    </Button>}
                 </PageButtonsContainer>
             }
             {
@@ -93,7 +94,7 @@ const Home = props => {
                             <Button
                                 variant='outlined'
                                 color='primary'
-                                onClick={(ev) => props.deleteVideo(ev.target.parentNode.parentNode.id)}
+                                onClick={(ev) => props.deleteVideo(props.loggedUser.id, ev.target.parentNode.parentNode.id)}
                             >
                                 Deletar
                             </Button>
@@ -109,7 +110,8 @@ const mapStateToProps = state => ({
     loggedUser: state.users.logged,
     highlightedUser: state.users.highlighted,
     videos: state.videos.list,
-    currentPage: state.videos.currentPage
+    currentPage: state.videos.currentPage,
+    lastPage: state.videos.lastPage
 })
 
 const mapDispatchToProps = dispatch => ({
@@ -118,8 +120,7 @@ const mapDispatchToProps = dispatch => ({
     login: user => dispatch(login(user)),
     getAllVideos: (page) => dispatch(getAllVideos(page)),
     highlightVideo: (id) => dispatch(highlightVideo(id)),
-    deleteVideo: id => dispatch(deleteVideo(id)),
-    changePage: (newPageNumber) => dispatch(changePage(newPageNumber))
+    deleteVideo: (userId, videoId) => dispatch(deleteVideo(userId, videoId))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Home)

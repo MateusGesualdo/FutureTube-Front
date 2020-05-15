@@ -48,7 +48,7 @@ export const login = user => dispatch => {
             dispatch(push(routes.root))
         })
         .catch(err => {
-            console.log(err.message)
+            alert('Usuário ou senha incorretos')
         })
 }
 
